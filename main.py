@@ -1,8 +1,12 @@
-from gurobipy import *
-import random
-import sys
+# from gurobipy import *
+from gurobipy import Model
+from gurobipy import quicksum
+from gurobipy import GRB
+from gurobipy import GurobiError
+# import random
+# import sys
 
-# Run on Mac OSX: time(gurobi.sh entrega-2.py) in the folder containing file
+# Run on Mac OSX: time(gurobi.sh main.py) in the folder containing file
 
 try:
     # Mencionar modelo (aqui va cualquier nombre
@@ -30,21 +34,19 @@ try:
     # 4 -> Fuera1: Basquet,Volley
     # 5 -> Fuera2: Basquet,Volley
 
-    # Tiempo en minutos
-    # T = [i + 1 for i in range(7 * 6)] si usamos intervalos de 10 min
-    T = [i + 1 for i in range(7 * 60)]  # si dejamos el original
+    # Bloques de Tiempo
+    T = [i + 1 for i in range(4)]
 
     # Equipos
     # 10 colegios en total
-    E = [i + 1 for i in range(10)]  
+    E = [i + 1 for i in range(10)]
 
     # Conjunto de dias en un mes en los que se puede jugar partidos(Sabado y Domingo intercalado).
-    # A = [i + 1 for i in range(8)]
-    A = [i + 1 for i in range(2)]
+    A = [i + 1 for i in range(8)]
 
     # P_d: Cantidad de partidos de liga del deporte d, con l in L.
     # por ahora 3 a 5 partidos por deporte por liga
-    P_d = [4,4,3,3,5,5,5,5,3,3]
+    P_d = [4, 4, 3, 3, 5, 5, 5, 5, 3, 3]
 
     # n_d: personas por equipo en el deporte d in D
     n_d = [22, 22, 13, 13, 13, 13, 15, 15, 16, 16]
@@ -56,10 +58,10 @@ try:
     veh_e = [11, 11, 9, 9, 9, 9, 8, 8, 10, 10]
 
     # bonificacion para los deportes, 100 para todos
-    b_d = [100 for i in range(10)]
+    b_d = [100 for i in range(len(D))]
 
     # minimo de partidos del deporte d in D
-    minp_d = 1
+    minp_d = [1 for d in range(len(D))]
 
     # cantidad maxima de espectadores en la cancha c in C
     emax_c = [100, 100, 60, 20, 20]
@@ -80,7 +82,7 @@ try:
             [0, 0, 0, 0, 0, 0, 1, 1, 1, 1],  # 4 -> Fuera1: Basquet,Volley
             [0, 0, 0, 0, 0, 0, 1, 1, 1, 1]]  # 5 -> Fuera2: Basquet,Volley
 
-    # q_ed = [[0 for i in range(50)] for i in range(10)]  # original
+    # q_ed = [[0 for i in range(len(E))] for i in range(len(D))]  # original
 
     # i = 0
     # j = 5
@@ -107,6 +109,8 @@ try:
     # Crear variables
     # u_eca = m.addVars(E, C, A, vtype=GRB.CONTINUOUS, lb=0.0, ub=GRB.INFINITY, name="u")
 
+    print("parametros listos")
+
     # si el equipo e comienza a jugar contra el equipo o en la cancha c, el deporte d, en el minuto t del dia a
     X_coedta = m.addVars(C, E, E, D, T, A, vtype=GRB.BINARY, name="x")
 
@@ -116,87 +120,108 @@ try:
     # Si el equipo e llega en vehiculos en el tiempo t en el dia a
     V_eta = m.addVars(E, T, A, vtype=GRB.BINARY, name="v")
 
+    print("variables listas")
+
     # FUNCION OBJETIVO
     m.setObjective(quicksum((quicksum(
-        X_coedta[cancha, equipoo, equipoe, deporte, minuto, dia] * (1 / 2) for dia in A for minuto in T for cancha in C
-        for equipoe in E for equipoo in E if equipoo != equipoe) - minp_d) * b_d[deporte - 1] for deporte in D),
-                   GRB.MAXIMIZE)
+        X_coedta[cancha, equipoo, equipoe, deporte, bloque, dia] * (1 / 2)
+        for dia in A for bloque in T for cancha in C for equipoe in E
+        for equipoo in E if equipoo != equipoe) - minp_d[deporte - 1]) * b_d[deporte - 1]
+                            for deporte in D), GRB.MAXIMIZE)
 
-    # Restriccion 1: Los ultimos partidos de un dia deben terminar antes del cierre de canchas
-    m.addConstrs(
-        (X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia]*minuto + t_d[deporte-1] <= 4 * 60 for equipoE in E for equipoO in E if equipoE != equipoO for cancha in C for dia in A for minuto in T
-         for deporte in D), 'C1')
+    print("FO lista")
 
-    # Restriccion 2: Se puede jugar en una cancha si esta lo permite
+    # Restriccion 1: Solo se puede jugar un partido en un bloque de tiempo t en cada cancha.
     m.addConstrs(
-        (X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia] <= s_cd[cancha-1][deporte-1] * q_ed[deporte-1][
-        equipoE-1] * q_ed[deporte-1][equipoO-1] for equipoE in E for equipoO in E if equipoE != equipoO for cancha in C for deporte in D
-        for minuto in T for dia in A), "c3")
+        (quicksum(X_coedta[cancha, equipoo, equipoe, deporte, bloque, dia] for dia in A for equipoe in E for equipoo in E if equipoo != equipoe for deporte in D) <= 1 for bloque in T for cancha in C), 'C1')
 
-    # Restriccion 4: Cada equipo puede jugar como maximo una vez al dia
-    m.addConstrs(
-        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia] for cancha in C for deporte in D for minuto in T)
-        <= 1 for equipoE in E for equipoO in E if equipoE != equipoO for dia in A), "c4")
+    print("R1 lista")
 
-    # Restriccion 5: Se debera jugar como minimo un partido por liga durante el mes
+    # Restriccion 2: Se puede jugar en una cancha si esta lo permite y los equipos juegan los respectivos deportes
     m.addConstrs(
-        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia] for cancha in C for equipoE in E for equipoO in E
-        if equipoE != equipoO for minuto in T for dia in A) <= 1 for deporte in D), "c5")
+        (X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia]
+         <= s_cd[cancha-1][deporte-1] * q_ed[deporte-1][equipoE-1] * q_ed[deporte-1][equipoO-1] for equipoE in E for equipoO in E if equipoE != equipoO for cancha in C for deporte in D
+         for bloque in T for dia in A), "C2")
 
-    # Restriccion 6: Si un equipo juega, tiene parte de los estacionamientos ocupados (autos y buses)
-    m.addConstrs(
-        (B_eta[equipo, minuto, dia] <= X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia]
-        for equipo in E for cancha in C for equipoE in E for equipoO in E if equipoE != equipoO
-        for deporte in D for minuto in T for dia in A), "c61")
-    m.addConstrs(
-        (V_eta[equipo, minuto, dia] <= X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia]
-        for equipo in E for cancha in C for equipoE in E for equipoO in E if equipoE != equipoO
-        for deporte in D for minuto in T for dia in A), "c62")
+    print("R2 lista")
 
-    # Restriccion 7: Cada equipo esta coordinado en llegar solo en bus o en auto
+    # Restriccion 3: Cada equipo puede jugar como maximo una vez al dia
     m.addConstrs(
-        (V_eta[equipo, minuto, dia] + B_eta[equipo, minuto, dia] <= 1
-        for equipo in E for minuto in T for dia in A), "c7")
+        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia] for cancha in C for deporte in D for bloque in T)
+         <= 1 for equipoE in E for equipoO in E if equipoE != equipoO for dia in A), "C3")
 
-    # Restriccion 8: No. de autos estacionados no puede superar capacidad max de estacionamientos
-    m.addConstrs(
-        (quicksum(V_eta[equipo, minuto, dia] for equipo in E) <= mveh
-        for minuto in T for dia in A), "c8")
+    print("R3 lista")
 
-    # Restriccion 9: No. de buses estacionados no puede superar capacidad max de estacionamientos
+    # Restriccion 4: Se debera jugar como minimo un partido por liga durante el mes
     m.addConstrs(
-        (quicksum(B_eta[equipo, minuto, dia] for equipo in E) <= mbus
-        for minuto in T for dia in A), "c9")
+        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia] for cancha in C for equipoE in E for equipoO in E
+        if equipoE != equipoO for bloque in T for dia in A) >= 1 for deporte in D), "C4")
 
-    # Restriccion 10: Ctdad. de jugadores que usan los camarines tiene que ser menor a su capacidad maxima para H y M
-    m.addConstrs(
-        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia] * n_d[deporte-1] for cancha in C for equipoE in E for equipoO in E
-        if equipoE != equipoO for minuto in T for dia in A) <= 2 * mc for deporte in D if deporte % 2 != 0), "c101")
-    m.addConstrs(
-        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, minuto, dia] * n_d[deporte-1] for cancha in C for equipoE in E for equipoO in E
-        if equipoE != equipoO for minuto in T for dia in A) <= 2 * mc for deporte in D if deporte % 2 == 0), "c102")
+    print("R4 lista")
 
-    # Restriccion 11: Ctdad. de espectadores para c/partido no debe superar capacidad max de c/cancha
+    # Restriccion 5: Si un equipo juega, tiene parte de los estacionamientos ocupados (autos y buses), de lo contrario no llega
     m.addConstrs(
-        (quicksum(V_eta[equipo, minuto, dia] for equipo in E) * 2 * n_d[deporte-1] <= emax_c[cancha-1]
-        for cancha in C for minuto in T for dia in A for deporte in D), "c11")
+        (X_coedta[cancha, equipo, equipoo, deporte, bloque, dia] == B_eta[equipo, bloque, dia] + V_eta[equipo, bloque, dia]
+         for cancha in C for equipo in E for equipoo in E if equipo != equipoo
+         for deporte in D for bloque in T for dia in A), "C5")
+
+    print("R5 lista")
+
+    # Restriccion 6: No. de autos estacionados en un bloque t no puede superar capacidad max de estacionamientos
+    m.addConstrs(
+        (quicksum(V_eta[equipo, bloque, dia] * n_d[deporte-1] * q_ed[deporte-1][equipo-1] for equipo in E) <= mveh
+        for bloque in T for dia in A for deporte in D), "C6")
+
+    print("R6 lista")
+
+    # Restriccion 7: No. de buses estacionados no puede superar capacidad max de buses
+    m.addConstrs(
+        (quicksum(B_eta[equipo, bloque, dia] for equipo in E) <= mbus
+        for bloque in T for dia in A), "C7")
+
+    print("R7 lista")
+
+    # Restriccion 8: Ctdad. de jugadores que usan los camarines tiene que ser menor a su capacidad maxima para H y M
+    m.addConstrs(
+        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia] * n_d[deporte-1] for cancha in C for equipoE in E for equipoO in E
+        if equipoE != equipoO for bloque in T for dia in A) <= 2 * mc for deporte in D if deporte % 2 != 0), "C81")
+    m.addConstrs(
+        (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia] * n_d[deporte-1] for cancha in C for equipoE in E for equipoO in E
+        if equipoE != equipoO for bloque in T for dia in A) <= 2 * mc for deporte in D if deporte % 2 == 0), "C82")
+
+    print("R8 lista")
+
+    # Restriccion 9: Ctdad. de espectadores para c/partido no debe superar capacidad max de c/cancha
+    m.addConstrs(
+        (quicksum(V_eta[equipo, bloque, dia] * n_d[deporte-1] * q_ed[deporte-1][equipo-1] for equipo in E) * 2 <= emax_c[cancha-1]
+        for cancha in C for bloque in T for dia in A for deporte in D), "C9")
+
+    print("R9 lista")
 
     # m.addConstrs((quicksum(a_rpt[punto, producto, tiempo] for punto in R for producto in S) >= 1 for tiempo in T), "c9")
 
     # Optimizar
     m.optimize()
 
+    print(len(m.getVars()), len(m.getConstrs()))
+
     status = m.status
 
     print('Status:', status)
 
-    if status == GRB.Status.INF_OR_UNBD or status == GRB.Status.INFEASIBLE or status == GRB.Status.UNBOUNDED:
+    if status == GRB.Status.INF_OR_UNBD:
         print('The model cannot be solved because it is infeasible or unbounded')
-        exit(1)
+
+    if status == GRB.Status.INFEASIBLE:
+        print("Model is INFEASIBLE")
+
+    if status == GRB.Status.UNBOUNDED:
+        print('Model is UNBOUNDED')
+        # exit(1)
 
     if status != GRB.Status.OPTIMAL:
         print('Optimization was stopped with status %d' % status)
-        exit(0)
+        # exit(0)
 
     if status == GRB.Status.OPTIMAL or status == 2:
         with open('results.txt', 'w') as archivo:
@@ -218,7 +243,7 @@ try:
                 const_file.write('{}, {} \r\n'.format(c.constrName, c.slack))
 
 
-    # print(len(m.getVars()), len(m.getConstrs()))
+    print(len(m.getVars()), len(m.getConstrs()))
 
 except GurobiError as e:
     print('Error code ' + str(e.errno) + ": " + str(e) + '-' + str(e.message))
