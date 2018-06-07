@@ -43,6 +43,7 @@ try:
 
     # Conjunto de dias en un mes en los que se puede jugar partidos(Sabado y Domingo intercalado).
     A = [i + 1 for i in range(8)]
+    # A = [i + 1 for i in range(16)]
 
     # P_d: Cantidad de partidos de liga del deporte d, con l in L.
     # por ahora 3 a 5 partidos por deporte por liga
@@ -65,15 +66,19 @@ try:
 
     # cantidad maxima de espectadores en la cancha c in C
     emax_c = [100, 100, 60, 20, 20]
+    # emax_c = [200, 200, 200, 200, 200]
 
     # capacidad maxima del camarin
-    mc = 20
+    # mc = 20
+    mc = 40
 
     # capacidad maxima del estacionamiento
     mveh = 100
+    # mveh = 300
 
     # cantidad de buses que caben en el estacionamiento
     mbus = 10
+    # mbus = 100
 
     # si en la cancha c se puede jugar el deporte d = 1, 0 e.o.c.
     s_cd = [[1, 1, 0, 0, 0, 0, 0, 0, 0, 0],  # 1 -> Futbol
@@ -82,7 +87,11 @@ try:
             [0, 0, 0, 0, 0, 0, 1, 1, 1, 1],  # 4 -> Fuera1: Basquet,Volley
             [0, 0, 0, 0, 0, 0, 1, 1, 1, 1]]  # 5 -> Fuera2: Basquet,Volley
 
+    # Puros 1s para probar que las canchas no sean el problema
+    # s_cd = [[1 for i in range(10)] for i in range(5)]
+
     # q_ed = [[0 for i in range(len(E))] for i in range(len(D))]  # original
+    # q_ed = [[1 for i in range(len(E))] for i in range(len(D))]
 
     # i = 0
     # j = 5
@@ -133,7 +142,7 @@ try:
 
     # Restriccion 1: Solo se puede jugar un partido en un bloque de tiempo t en cada cancha.
     m.addConstrs(
-        (quicksum(X_coedta[cancha, equipoo, equipoe, deporte, bloque, dia] for dia in A for equipoe in E for equipoo in E if equipoo != equipoe for deporte in D) <= 1 for bloque in T for cancha in C), 'C1')
+        (quicksum(X_coedta[cancha, equipoo, equipoe, deporte, bloque, dia] for equipoe in E for equipoo in E if equipoo != equipoe for deporte in D) <= 1 for cancha in C for bloque in T for dia in A ), 'C1')
 
     print("R1 lista")
 
@@ -161,9 +170,8 @@ try:
 
     # Restriccion 5: Si un equipo juega, tiene parte de los estacionamientos ocupados (autos y buses), de lo contrario no llega
     m.addConstrs(
-        (X_coedta[cancha, equipo, equipoo, deporte, bloque, dia] == B_eta[equipo, bloque, dia] + V_eta[equipo, bloque, dia]
-         for cancha in C for equipo in E for equipoo in E if equipo != equipoo
-         for deporte in D for bloque in T for dia in A), "C5")
+        (quicksum(X_coedta[cancha, equipo, equipoo, deporte, bloque, dia] for deporte in D for cancha in C for equipoo in E if equipo != equipoo) == B_eta[equipo, bloque, dia] + V_eta[equipo, bloque, dia]
+         for bloque in T for dia in A for equipo in E), "C5")
 
     print("R5 lista")
 
@@ -200,14 +208,21 @@ try:
 
     # m.addConstrs((quicksum(a_rpt[punto, producto, tiempo] for punto in R for producto in S) >= 1 for tiempo in T), "c9")
 
+    m.addConstrs((X_coedta[cancha, equipo, equipo, deporte, bloque, dia] == 0 for cancha in C for equipo in E for bloque in T for dia in A for deporte in D), "C10")
+
     # Optimizar
     m.optimize()
 
-    print(len(m.getVars()), len(m.getConstrs()))
+    print("Num Vars: ", len(m.getVars()))
+    print("Num Restricciones: ", len(m.getConstrs()))
 
     status = m.status
 
     print('Status:', status)
+
+    if status != GRB.Status.OPTIMAL:
+        print('Optimization was stopped with status %d' % status)
+        # exit(0)
 
     if status == GRB.Status.INF_OR_UNBD:
         print('The model cannot be solved because it is infeasible or unbounded')
@@ -219,10 +234,6 @@ try:
         print('Model is UNBOUNDED')
         # exit(1)
 
-    if status != GRB.Status.OPTIMAL:
-        print('Optimization was stopped with status %d' % status)
-        # exit(0)
-
     if status == GRB.Status.OPTIMAL or status == 2:
         with open('results.txt', 'w') as archivo:
             # Por si queremos poner el archivo resultados los valores de algunos parametro importantes
@@ -232,7 +243,7 @@ try:
             # archivo.write(str(len(T)) + '\r\n')
 
             for v in m.getVars():
-                print(v.varName, v.x)
+                # print(v.varName, v.x)
                 archivo.write('{}, {} \r\n'.format(v.varName, v.x))
 
             print('Obj:', m.objVal)
@@ -241,9 +252,6 @@ try:
         with open('cons.txt', 'w') as const_file:
             for c in m.getConstrs():
                 const_file.write('{}, {} \r\n'.format(c.constrName, c.slack))
-
-
-    print(len(m.getVars()), len(m.getConstrs()))
 
 except GurobiError as e:
     print('Error code ' + str(e.errno) + ": " + str(e) + '-' + str(e.message))
