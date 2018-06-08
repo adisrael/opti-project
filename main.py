@@ -283,6 +283,19 @@ try:
                 # print(v.varName, v.x)
                 archivo.write('{}, {} \r\n'.format(v.varName, v.x))
 
+        with open('results.csv', 'w') as file:
+            file.write('Obj: {} \r\n'.format(m.objVal))
+            file.write('Non-Zero Variables\r\n')
+            file.write('varName;value;\r\n')
+            for v in m.getVars():
+                if v.x != 0.0:
+                    file.write('{};{};\r\n'.format(v.varName, v.x))
+
+            file.write('All Variables\r\n')
+            file.write('varName;value;')
+            for v in m.getVars():
+                file.write('{};{};\r\n'.format(v.varName, v.x))
+
         with open('cons.txt', 'w') as const_file:
             for c in m.getConstrs():
                 const_file.write('{}, {} \r\n'.format(c.constrName, c.slack))
