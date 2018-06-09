@@ -1,0 +1,76 @@
+\section{Descripción del Problema}
+
+\indent El problema elegido es la optimización del calendario deportivo del colegio Instituto Hebreo, en el que se llevan a cabo diversos partidos y competencias en sus canchas y gimnasio durante los fines de semanas. Entre los deportes más recurrentes se destacan fútbol, hándbol, voleibol, básquetbol y futsal. 
+
+\indent El proceso de organización y coordinación de fechas es un problema actual para los profesores del área, puesto que al no poseer un programa computacional que optimice el proceso, esto se realiza a mano con ayuda de una planilla Excel que ocupan como calendario. Este proceso les toma muchas horas de coordinación y aun así suelen presentarse problemas de tope de horarios y logísticos (camarines llenos, estacionamiento lleno sin posibilidad de las delegaciones estacionen sus buses, aglomeración en entradas y salidas simultaneas, etc) Se cree que un modelo de optimización podría acelerar y facilitar el proceso, y de paso lograr hacerlo más óptimo. 
+
+\indent Con el modelo a desarrollar se busca que la mayor cantidad de partidos se lleven a cabo sin producirse los inconvenientes mencionados. Adicional a esto, cada liga deportiva, tanto de mujeres como de hombres, posee una cantidad de partidos por mes exigiendo a los colegios participantes, que cuenten con instalaciones deportivas propias, ser sede de un mínimo de partidos al mes. Como estímulo, las ligas premian a los colegios por cada partido jugado en su sede adicional al exigido con un bono $b$. Es por esta razón que la función objetivo buscará maximizar la bonificación obtenida en un mes. 
+
+\indent Para lograr lo anterior, se requiere encontrar qué partidos se realizarán (de qué deporte, de qué liga y de qué equipos), en qué cancha y el horario en el que se llevarán a cabo. Para esto se define la variable $X_{e,o,c,d,t,\alpha}$ como variable binaria que indica si un equipo $e$ comienza a jugar contra el equipo $o$ ($o\neq e$) un partido del deporte $d$ en la cancha $c$ en el bloque de tiempo $t$ del día $\alpha$.
+
+\indent Se deben tener en consideración ciertos parámetros que serán entregados por el problema real para la formulación de las restricciones.  El establecimiento se puede ocupar los días Sábado y Domingo de 9:00 a 17:00 horas.  Dispone de una cantidad exacta de canchas y se sabe qué deportes se pueden realizar en cada una de ellas. Por otra parte se tiene la duración de cada partido, la cantidad de personas que juegan un partido de un deporte (incluidas reservas y el entrenador), y la máxima cantidad de personas que puede haber de espectadores. Se sabe como se mencionó anteriormente, que existen 5 deportes que se pueden jugar en el establecimiento; fútbol, fútsal, hándbol, voleibol y básquetbol y que en total existen 10 equipos (colegios) que cuentan con cierto número de sub-equipos que pueden o no jugar los deportes mencionados. Se asume que los jugadores que llegan en auto, lo harán con 2 acompañantes cada uno. También se asume como conocido el número de equipos que llegan en bus, los que no incluyen acompañantes. Finalmente se tiene que la capacidad máxima del estacionamiento es de 100 vehículos y 2 buses. En cuanto a camarines, hay cuatro de ellos, dos destinados a hombres y dos a mujeres, con capacidad máxima de 40 personas y sus implementos en cada uno. Por último se cuenta con un presupuesto para cada liga, que tienen para arrendar los buses en los que pueden llegar los jugadores, y el costo de arrendar estos buses.\\
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Cancha & Max espectadores\\
+\hline \hline
+Fútbol &  200 \\ \hline
+Gimnasio & 200 \\ \hline
+Hándbol & 120 \\ \hline
+Fuera 1 & 80 \\ \hline
+Fuera 2 & 80 \\ \hline
+\end{tabular}
+\vspace{5pt}
+\begin{flushleft}
+\footnotesize{\textbf{Tabla 1.} Parámetros recolectados sobre información de las canchas a utilizar basado en datos reales aproximados.}
+\end{flushleft}
+\end{center}
+
+
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+Deporte & Categoría& Duración & N jugadores  \\
+\hline \hline
+Fútbol & Hombres & 120  & 22   \\ \hline
+Fútbol & Mujeres & 120 & 22  \\ \hline
+Voleibol & Hombres & 90 & 13    \\ \hline
+Voleibol & Mujeres & 90 & 13   \\ \hline
+Futsal & Hombres & 70 & 13  \\ \hline
+Futsal & Mujeres & 70 & 13  \\ \hline
+Hándbol & Hombres & 90 & 15  \\ \hline
+Hándbol & Mujeres & 90 & 15  \\ \hline
+Básquetbol & Hombres & 80 & 16   \\ \hline
+Básquetbol & Mujeres & 80 & 16  \\ \hline
+\end{tabular}
+
+\vspace{5pt}
+\begin{flushleft}
+\footnotesize{\textbf{Tabla 2.} Parámetros recolectados sobre información de los deportes y categorías a utilizar basado en datos reales aproximados.}
+\end{flushleft}
+\end{center}
+
+\indent En cuanto a los presupuesto que tiene cada liga se tiene lo siguiente (en pesos chilenos): Fútbol hombres=100000, fútbol mujeres=90000, voleibol hombres=70000, voleibol mujeres=60000, futsal hombres=70000, futsal mujeres=60000, hándbol hombres=80000, hándbol mujeres=70000, básquetbol hombres=90000 y básquetbol mujeres=80000.
+En cuanto al costo de arrendar un bus para cada deporte se tiene (en pesos chilenos): Fútbol=10000, voleibol=6000, futsal=6000, Hándbol=7000 y Básquetbol=8000 (mismo costo para ligas de hombres y  mujeres).\\
+\indent El modelo se verá sometido a las restricciones con las que se enfrenta el colegio en el proceso de calendarización. Se tiene que no se podrán usar más canchas de las que hayan disponibles. No se puede jugar más de un partido a la vez en una cancha y solo se podrán jugar partidos de cierto deporte si la cancha lo permite. Los partidos serán jugados dentro de bloques de tiempo y no se podrá jugar más de un partido en una cancha en un mismo bloque. Se debe cumplir que la cantidad de espectadores no supere al máximo por cancha. Cada equipo puede jugar una vez al día. Se considera que cada día contiene 4 bloques de tiempo, cada uno de 2 horas, en el que se puede jugar como máximo un partido por cancha. Cada deporte se deberá jugar mínimo una vez en todo el mes en el colegio. La cantidad de buses y vehículos no debe superar la capacidad del estacionamiento. La cantidad de personas jugando partidos en un bloque de tiempo no debe superar la capicad de los camarines.
+
+\indent \\
+\indent Con el fin de simplificar la modelación, se tendrán los siguientes supuestos:
+
+\begin{itemize}
+
+    \item Cada mes contiene cuatro días Sábado y Domingo.
+    
+    \item Las condiciones climáticas serán favorables para la realización de los partidos.
+    
+    \item Todos los equipos están completos, es decir, no existe impedimiento para que jueguen por falta de jugadores.
+    
+    \item Los equipos se organizan para llegar todos en un bus, o por separado en vehículos particulares.
+    
+    \item Los autos están estacionados por el tiempo de duración del partido.
+    
+    \item Todos los jugadores dejan sus cosas en los camarines por el tiempo de duración del partido.
+    
+\end{itemize}

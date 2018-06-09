@@ -1,0 +1,202 @@
+
+\section{Modelo}
+
+\subsection{Conjuntos}
+\begin{itemize}
+
+    \item $C$ = Conjunto de canchas.
+    \begin{enumerate}
+        \item Futbol
+        \item  Gimnasio: Futsal, Volley, Basquet
+        \item Handbol
+        \item Fuera1: Basquet,Volley
+        \item Fuera2: Basquet,Volley
+
+    \end{enumerate}
+    
+    \item $D$ = \{1 \dots 10\}; Tipos de liga. 
+    \begin{enumerate}
+    
+        \item Futbol hombre.
+        \item Futbol mujer.
+        \item Futsal hombre.
+        \item Futsal mujer.
+        \item Hándbol hombre.
+        \item Hándbol mujer.
+        \item Voleibol hombre.
+        \item Voleibol mujer.
+        \item Básquetbol hombre.
+        \item Básquetbol mujer.
+        
+    \end{enumerate}
+    
+    \item $T$ = \{1 \dots 4\}; Bloques de tiempo en un día, de 2 horas cada uno.
+    
+    \item $E$ = \{1,\dots,10\}; Conjunto de equipos (colegios) .
+    
+    \item $A$ = \{1, \dots, 8\}; Conjunto de días en un mes en los que se puede jugar partidos (Sábado y Domingo intercalado).
+    
+\end{itemize}
+
+\subsection{Parámetros}
+\begin{itemize}
+    
+    \item $n_{d}$ = Cantidad de personas por equipo en un partido de $d$, con $d\in D$.
+    
+    \item $t_{d}$ = Duración de un partido del deporte $d$, con $d\in D$.
+
+%    \item $ti_{c}$ = Tiempo de espera entre partidos en cancha $c$, con $c\in C$.
+    
+    
+    \item $b_{d}$ = Bonificación por vez, mayor al mínimo, que el colegio sea sede de una liga.
+    
+    \item $minp_d$ = 1 = Mínimo de partidos que cada liga $d$ exige se jueguen al mes en el colegio.
+        
+    \item $emax_{c}$ = Cantidad maxima de espectadores por cancha.
+    
+    \item $mc$ = Cantidad máxima de personas que caben en un camarin.
+    
+    \item $mveh$ = Cantidad máxima de vehículos que caben en el estacionamiento.
+    
+    \item $mbus$ = Cantidad máxima de buses que caben en el estacionamiemto.
+    
+    \item $pres_{d}$ = Presupuesto que cada liga cuenta para el arriendo de buses.
+    
+    \item $cb_{d}$ = Es costo de arriendo de buses para los equipos de cada liga.
+    
+    
+\end{itemize}
+
+
+\begin{align*}
+s_{c,d} &= \begin{cases} 
+      1 & \text{si en la cancha c se puede jugar el deporte d, con $c\in C$ y $d\in D$} \\
+      0 & \text{en otro caso} 
+   \end{cases}\\
+q_{e,d} &= \begin{cases} 
+      1 & \text{si el equipo e juega deporte d, con $e\in E$, $d\in D$.} \\
+      0 & \text{en otro caso} 
+   \end{cases}\\  
+\end{align*}
+
+\subsection{Variables}
+
+%\noindent $u_{e,c,\alpha}$ = Minuto en el que el equipo $e$ comienza a jugar partido en la cancha $c$ en el día $\alpha$, con $c\in C$, $e\in E$ y $\alpha \in A$.\\
+\begin{align*}
+
+X_{e,o,c,d,t,\alpha} &= \begin{cases}
+1 & \text{si el equipo $e$ comienza a jugar contra el equipo $o$ en la cancha $c$,}\\
+& \text{el deporte $d$, en el bloque $t$ del dia $\alpha$.}
+        $e \in E$, $d \in D$, $c\in C$, $t\in T$ y $\alpha \in A$ \\
+      0 & \text{en otro caso} 
+   \end{cases}\\   
+   
+% Y_{e,o,c,t, \alpha} &= \begin{cases} 
+%       1 & \text{si el equipo $e$ comienza a jugar contra $o$ en cancha $c$ en tiempo $t$ del día $\alpha$.} \\
+%       & $e,o \in E$, $o \neq e$, $c\in C$, $t \in T$ y $\alpha \in A$. \\
+%       0 & \text{en otro caso} 
+%   \end{cases}\\ 
+   
+B_{e,t, \alpha} &= \begin{cases} 
+      1 & \text{Si el equipo $e$ llega en bus en el bloque de tiempo $t$ en el día $\alpha$, e $\in E$, $t \in T$ y $\alpha \in A$.}\\
+      0 & \text{en otro caso} 
+    \end{cases}\\
+    
+V_{e,t, \alpha} &= \begin{cases} 
+      1 & \text{Si el equipo $e$ llega en vehículos en el bloque de tiempo $t$ en el día $\alpha$, e $\in E$, $t \in T$ y $\alpha \in A$.}\\
+      0 & \text{en otro caso} 
+    \end{cases}\\
+    
+%gamma_{c,e,d,t,\alpha} &= \begin{cases}
+%    1 & \text{si el equipo e está jugando en cancha c, el %deporte d, en el instante t del día $\alpha$.}\\
+%     & $e \in E$, $d \in D$, $c \in C$, $t \in T$ y $\alpha %\in A$ \\
+%    0 & \text{en otro caso} 
+%    \end{cases}
+
+\end{align*}
+
+\subsection{Función objetivo}
+
+\begin{center}
+
+	\[\max{\sum_{d \in D}\bigg(\Big(\big( \sum_{e \in E} \sum_{o \in E, o\neq e}\sum_{c \in C} \sum_{t \in T }\sum_{\alpha \in A}} {\frac{X_{e,o,c,d,t,\alpha}}{2}\big) - 1\Big)b_{d}}\bigg)\quad\]
+
+\end{center}
+
+\indent La función objetivo maximiza la bonificación que se obtiene. Esta bonificación como se expresó anteriormente es entregada por cada partido del cual el colegio es sede luego de superar el mínimo establecido por las ligas (1 partido).\\
+
+\indent Se calcula de la forma de sumar todos los partidos jugados por todos los equipos para cada liga. Ese número sumará 2 veces cada partido debido a que en cada deporte se enfrentan 2 equipos que son considerados en la suma, por lo tanto se divide en 2. Luego se debe ver los partidos que se realizaron superando el mínimo (se resta el 1). Finalmente el número que queda se multiplica por la bonificación entregada por cada liga. 
+
+\subsection{Restricciones}
+\noindent 
+
+\begin{enumerate}
+
+    \item Solo se puede jugar un partido en un bloque de tiempo $t$ en cada cancha.
+    
+        \[\sum_{e\in E}\sum_{o\in E, o\neq e}\sum_{d\in D}{\frac{X_{e,o,c,d,t,\alpha}}{2}}\leq 1 \quad \forall t\in T,\forall c\in C, \forall \alpha\in A\]
+    
+   
+    \item Se puede jugar en cancha $c$, el deporte $d$, en el bloque $t$, si el equipo $e$ y el equipo $o$ juegan el deporte $d$ y la cancha lo permite.
+    
+        \[X_{e,o,c,d,t,\alpha}\leq s_{c,d}*q_{e,d}*q_{o,d} \quad \forall e,o\in E, o\neq e, \forall c\in C,\forall d\in D,\forall t\in T, \forall \alpha\in A\]
+    
+    \item Cada equipo puede jugar como máximo una vez al día.
+    
+        \[\sum_{c\in C}\sum_{d\in D}\sum_{t\in T}{X_{e,o,c,d,t,\alpha}}\leq 1 \quad \forall e,o\in E,o\neq e,\forall \alpha\in A\]
+    
+    \item Se deberá jugar como mínimo un partido por deporte (liga) durante el mes.
+    
+        \[\sum_{e\in E}\sum_{o\in E, o\neq e}\sum_{c\in C}\sum_{t\in T}\sum_{\alpha\in A}X_{e,o,c,d,t,\alpha} \geq 1, \quad \forall d\in D \]
+    
+%    \item Si un equipo va a jugar, necesariamente tienen que tener parte del estacionamiento ocupado. Lo mismo para los buses.
+    
+        %\[B_{e,t,\alpha}\leq X_{e,o,c,d,t,\alpha},\quad \forall e,o\in E, o\neq e, \forall c\in C,\forall d\in D,\forall t\in T, \forall \alpha\in A \]
+        
+        %\[V_{e,t,\alpha}\leq X_{e,o,c,d,t,\alpha},\quad \forall e,o\in E, o\neq e, \forall c\in C,\forall d\in D,\forall t\in T, \forall \alpha\in A \]
+        
+%    \item Cada equipo está coordinado en llegar solo en bus o solo en vehículos particulares.
+    
+        %\[V_{e,t,\alpha} + B_{e,t,\alpha} \leq 1  \quad \forall e \in E, \forall t\in T, \alpha\in A\] 
+    
+    \item Si un equipo va a jugar en el bloque de tiempo $t$, debe llegar de alguna forma, de lo contrario, no llega.
+    
+        \[\sum_{o\in E, o\neq e}\sum_{c\in C}\sum_{d\in D}X_{e,o,c,d,t,\alpha} = B_{e,t,\alpha} + V_{e,t,\alpha} \quad \forall e\in E, \forall t\in T, \forall \alpha\in A \]
+    
+    \item El número de vehiculos estacionados en un bloque de tiempo $t$ no puede superar la máxima capacidad del estacionamiento.
+    
+        \[\sum_{e\in E}{(V_{e,t,\alpha}*n_{d}*q_{e,d})}\leq mveh \quad \forall d\in D, t\in T, \alpha\in A\]       
+    
+%        \[\sum_{e\in E}\gamma_{c,e,d,t,\alpha}*veh_{e}\leq %mveh\]
+
+    \item La cantidad total de buses que hay en un bloque de tiempo $t$ debe ser menor o igual a la capacidad máxima de buses.
+    
+        \[\sum_{e\in E}{B_{e,t,\alpha}}\leq mbus \quad \forall t\in T, \alpha\in A\]     
+        
+    \item Los equipos pueden llegar en bus tantas veces como el presupuesto de su liga lo permita.
+    
+        \[\sum_{e\in E}\sum_{t\in T}\sum_{\alpha \in A}{B_{e,t,\alpha}} * cb_ {d}\leq pres_{d}\quad \forall d\in D\]     
+        
+    \item La cantidad de jugadores que usan los camarines tiene que ser menor a la capacidad máxima de los camarines, para hombres y mujeres.
+    
+        \[\sum_{e\in E}\sum_{o\in E,o\neq e}\sum_{c\in C}\sum_{d\in (1,3,5,7,9)}{X_{e,o,c,d,t,\alpha}*n_{d}} \leq 2*mc \quad \forall t\in T, \forall \alpha\in A\]
+        \[\sum_{e\in E}\sum_{o\in E,o\neq e}\sum_{c\in C}\sum_{d\in (2,4,6,8,10)}{X_{e,o,c,d,t,\alpha}*n_{d}} \leq 2*mc \quad \forall t\in T, \forall \alpha\in A\]
+        
+    \item La cantidad de espectadores para cada partido no debe superar la capacidad máxima de espectadores de cada cancha.
+
+      \[2\sum_{e\in E}{(V_{e,t,\alpha}*n_{d}*q_{e,d})}  \leq emax_{c} \quad \forall c \in C, d\in D, \forall t \in T,\forall \alpha \in A\]
+    
+    \item Si un equipo $e$ juega un partido contra un equipo contrincante $o$, $o$ también juega un partido con el equipo $e$ en el mismo tiempo en la misma cancha.
+    
+        \[ X_{e,o,c,d,t,\alpha} = X_{o,e,c,d,t,\alpha} \quad \forall e,o\in E, o\neq e, \forall c\in C,\forall d\in D,\forall t\in T, \forall \alpha\in A\  \]
+    
+        
+    \item Naturaleza de Variables
+    
+        \[X_{e,o,c,d,t,\alpha}\in \{ 0,1 \} \quad \forall e,o\in E, o\neq e, \forall c\in C,\forall d\in D,\forall t\in T, \forall \alpha\in A \]
+        \[B_{e,t,\alpha},V_{e,t,\alpha}\in \{ 0,1 \}, \quad \forall e \in E, \forall t \in T, \forall \alpha \in A\]
+
+    
+\end{enumerate}
+
+\vspace{5pt}

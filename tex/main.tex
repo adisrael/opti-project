@@ -1,0 +1,99 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\usepackage[utf8]{inputenc}
+
+\usepackage{lipsum}
+\usepackage{amsmath,amssymb,amsfonts,amsbsy}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{hyperref}
+
+\graphicspath{ {./figures/} }
+
+%\usepackage[pass]{geometry}
+\usepackage[left=1.25in,right=1.25in,top=1.0in,bottom=1.0in]{geometry}
+\usepackage{listings}
+
+% Para justificar el texto (/justify)
+\usepackage{ragged2e}
+
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.65}
+\definecolor{deepred}{rgb}{0.7,0,0}
+\definecolor{deepgreen}{rgb}{0,0.6,0}
+
+\newcommand{\mytitle}{Tarea 1}
+\newcommand{\myauthor}{Consuelo Valencia}
+\newcommand{\mydate}{\today}
+
+\begin{document}
+
+\begin{minipage}[t]{.13\textwidth}
+	\vspace{-0.25in}
+	\begin{figure}[H]
+	\includegraphics[width=0.90\textwidth]{logo.pdf}
+	\end{figure}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.85\textwidth}
+    \vspace{0pt}
+    \begin{flushleft}
+      \begin{tabular}{l}
+	{\sc Pontificia Universidad Cat\'olica de Chile}\\
+  	{\sc Escuela de Ingenier\'ia}\\
+  	{\sc Departamento de Ingenier\'ia Industrial y Sistemas}\\
+ 	 {\sc ICS1113-Optimizaci\'on y ICS113H-Optimizaci\'on Honors}
+ \end{tabular}
+	\end{flushleft}
+\end{minipage}
+\vspace{0pt}
+\hfill
+\vspace*{6cm}
+\begin{center}{}
+\vspace*{2mm}
+{\Huge\bf Informe 3}\\
+\vspace*{4mm}
+\hrule\vspace*{1pt}\hrule
+\vspace*{4mm}
+{\LARGE\bf Calendarización de Eventos Deportivos Escolares}\\
+\vspace*{4mm}
+{\huge\bf Grupo 83 }\\
+\vspace*{1mm}
+\end{center}
+
+\vspace*{30mm}
+\flushright 
+	
+Rodrigo Alonso	17637716 Sección 3\\
+Francisca Carvajal	13638696 Sección 3\\
+Alexander Israel	1563437J Sección 3\\
+Donna Jana	13621408 Sección 3\\
+Hue Bin Kim	13649256 Sección 5\\
+Mauricio Pinto 17639468 Sección 3\\
+
+ 
+\vspace*{5mm}
+{\large Fecha entrega: 8 de Junio de 2018\\}
+
+\newpage
+\flushleft
+\justify
+\input{1Introduccion.tex}
+
+\input{2Descripcion.tex}
+
+\input{3Modelo.tex}
+
+\input{4Resultados.tex}
+
+\input{5AnalisisdeSensibilidad.tex}
+
+\input{6Bibliografia.tex}
+
+\input{7Anexos.tex}
+
+\end{document}

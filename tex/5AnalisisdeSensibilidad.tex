@@ -1,0 +1,48 @@
+\section{Análisis de Sensibilidad}
+
+\subsection{Análisis de sensibilidad de restricciones relevantes. }
+
+\indent Se considera que las restricciones más relevantes del problema son la 3 (cantidad máxima de partidos por equipo al día), 6 (máxima capacidad de vehículos en el estacionamiento), 7 (máxima capacidad de buses en el estacionamiento), 8 (presupuesto para arrendar buses), 9 (capacidad máxima de los camarines) y 10 (cantidad máxima de espectadores por cancha). La desición se debe a que todas las restricciones escogidas acotan por arriba a una de las tres variables del problema de maximización, y porque sería válido cambiar el límite de cada una de ellas sin imponer una situación irrealista. 
+
+R3: \[\sum_{c\in C}\sum_{d\in D}\sum_{t\in T}{X_{e,o,c,d,t,\alpha}}\leq 1 \quad \forall e,o\in E,o\neq e,\forall \alpha\in A\]
+Al modificar el 1 de la parte derecha de la restricción, a un número mayor, se espera que la variable $X_{e,o,c,d,t,\alpha}$ pueda alcanzar un mayor valor, es decir que cada equipo pueda jugar un mayor número de partidos al día. Con esta modificación, se espera que la variable analizada sea igual a 1 en más instancias dentro de un mismo día, y de esta forma se jueguen más partidos y así el valor objetivo pueda ser mayor. Cabe notar que esta restricción estará sujeta también a las capacidades de los espacios, es decir, podría volverse infactible si se pide un mínimo mayor de partidos pero que el espacio no dé abasto para ello.
+
+R6:\[\sum_{e\in E}{(V_{e,t,\alpha}*n_{d}*q_{e,d})}\leq mveh \quad \forall d\in D, t\in T, \alpha\in A\]  
+Al aumentar mveh, en un número mayor a la cantidad de personas en un equipo de algún deporte, $V_{e,t,\alpha}$ podría tomar valor 1 para más equipos que los entregados dentro de un mismo bloque de tiempo. De esta forma aumentaría la posibilidad de que la variable $X_{e,o,c,d,t,\alpha}$ tome valor 1 para un tiempo y así se aumentaría el valor objetivo. Al diminuir mveh, disminuiría el número de personas que llega en auto. De esa forma se estaría forzando a la variable $B_{e,t,\alpha}$ a tomar el valor 1 para más equipos segun la restricción 5. Se entiende según la misma restricción recién mencionada, que si no es posible que $B_{e,t,\alpha}$ ni $V_{e,t,\alpha}$ sea 1, un partido para ese equipo en ese tiempo no se puede realizar, lo que disminuiría el valor objetivo.
+
+R7: \[\sum_{e\in E}{B_{e,t,\alpha}}\leq mbus \quad \forall t\in T, \alpha\in A\]   
+
+De igual forma que con R6, al aumentar mbus, más personas podrían llegar en bus y de esta forma se podrían realizar más partidos dentro de un mismo bloque de tiempo, aumentando el valor objetivo. Al disminuir el valor mbus, sucede de igual manera que lo analizado en R6 para $V_{e,t,\alpha}$.
+
+R8: \[\sum_{e\in E}\sum_{t\in T}\sum_{\alpha \in A}{B_{e,t,\alpha}} * cb_ {d}\leq pres_{d}\quad \forall d\in D\]
+Al cambiar el valor de $pres_d$, $B_{e,t,\alpha}$ se ve afectada directamente por lo que que tendría similar comportamiento a la restricción 7.
+
+
+R9:     \[\sum_{e\in E}\sum_{o\in E,o\neq e}\sum_{c\in C}\sum_{d\in (1,3,5,7,9)}{X_{e,o,c,d,t,\alpha}*n_{d}} \leq 2*mc \quad \forall t\in T, \forall \alpha\in A\]
+        \[\sum_{e\in E}\sum_{o\in E,o\neq e}\sum_{c\in C}\sum_{d\in (2,4,6,8,10)}{X_{e,o,c,d,t,\alpha}*n_{d}} \leq 2*mc \quad \forall t\in T, \forall \alpha\in A\]
+
+Al cambiar mc a un valor mayor, más personas podrían caber en un camarín. Si el cambio es mayor a la cantidad de personas que tienen dos equipos de un deporte, luego podría suceder que la variable $X_{e,o,c,d,t,\alpha}$ tomara valor 1 para un partido más dentro de un mismo bloque de tiempo, aumentando así el valor objetivo. 
+
+
+R10: \[2\sum_{e\in E}{(V_{e,t,\alpha}*n_{d}*q_{e,d})}  \leq emax_{c} \quad \forall c \in C, d\in D, \forall t \in T,\forall \alpha \in A\]
+
+Esta restricción considera que cada persona que llega en vehículo trae a dos acompañantes. Si se aumenta el valor de $emax_c$, en un número mayor a dos veces la cantidad de personas de un equipo, la variable $V_{e,t,\alpha}$ podría tomar valor 1 para más equipos dentro de un mismo bloque de tiempo. De esta forma, como ya se mencionó, la variable $X_{e,o,c,d,t,\alpha}$ también podría tomar valor 1 para más equipos y así jugarse más partidos en un tiempo, aumentando el valor objetivo.
+
+
+\subsection{Análisis de cuantitativo. }
+
+\indent En cuanto a las variaciones cuantitativas de la función objetivo al realizar el análisis de sensibilidad, se evaluaron los valores limites hasta el cual se pueden variar las restricciones cambiando el valor de la función objetivo.
+\indent R3: Se realizaron varias iteraciones, en la primero se modificó el número de partidos por día de 1 a 2 obteniéndose un valor objetivo de 5900, luego se aumentó a 3 obteniéndose 6100, finalmente se aumentó a 4 obteniéndose un valor de 6400. Siendo 4 la cota máxima que genera cambios en el resultado obtenido por la F.O.
+\indent R8: El aumento del presupuesto para el arriendo de buses para cada liga hace que el valor objetivo de la función aumente de 5400 a 5600 si es que se expande para poder arrendar solo uno más. Cabe destacar que el aumento de estos presupuestos incide de manera importante en el valor objetivo de la función, aumentándolo casi al dobre al tener diez veces el presupuesto actual disponible para cada liga. 
+
+\indent R9: Se realizaron varias iteraciones aumentando la capacidad máxima por camarín pero se mantuvo constante el valor de la función objetivo. Por otro lado, al disminuir su capacidad 21 el problema se vuelve infactible; cosa que es de esperar dado que el número de jugadores de los equipos de fútbol son 22, los que tienen que jugar a lo menos una vez durante el mes.
+
+\indent También se evaluó el comportamiento frente al cambio de los parámetros $mvhe$ y $mbus$ los cuales afectan directamente en la restricciones R6 y R7. Este cambio no alteró el valor de la función objetivo.
+
+\subsection{Análisis de criticidad de restricciones. }
+
+\indent En los resultados se puede observar que para cada día existe un grupo de equipos que no juegan más de una vez. Esto implica que existen cantidad de R3 activas como existen partidos al día. Para las combinaciones de posibles partidos que no se juegan en un día, la R3 queda inactiva. Esto afecta directamente al valor objetivo ya limita diariamente a la variable $X_{e,o,c,d,t,\alpha}$.\\
+\indent La restricción 6 se entiende que núnca está activa, ya que a lo más en los resultados obtenidos, habrán cuatro equipos con sus integrantes llegando en vehículo al recinto en un bloque de tiempo, y aún en ese caso no se alcanza a llegar al máximo de vehículos estacionados.\\
+\indent La restricción 7 impone que a lo más en un bloque de tiempo hayan dos buses estacionados. Esto ocurre en los bloques que se juega un solo partido y ambos equipos llegan en bus, lo que  pasa solamente en el bloque 3 del día 7. En todos los otros instantes la restricción estña inactiva. Al estar activa hace que el resto de los equipos que juegan en ese bloque lleguen necesariamente en auto. La inactividad de la restricción no afecta al valor de la función objetivo. 
+\indent La restricción 9 se mantendrá inactiva para aquellos instancias en los que se juegan partidos de pocos jugadores, por ejemplo, así nunca sobrepasando la capacidad límite de los camarines para ambos sexos.
+\indent La restricción 10 se encontrará inactiva para los casos en los que uno o dos de los equipos llegan en bus a un partido. Esto es porque la llegada en bus implica no traer espectadores, o no los suficientes como para sobrepasar la capacidad máxima de las canchas.
