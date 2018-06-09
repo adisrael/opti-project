@@ -66,15 +66,15 @@ try:
 
     # cantidad maxima de espectadores en la cancha c in C
     emax_c = [200, 200, 120, 80, 80]
-    # emax_c = [200, 200, 200, 200, 200]
+    # emax_c = [200, 200, 120, 80, 80]
 
     # capacidad maxima del camarin
-    # mc = 20
     mc = 40
+    # mc = 128
 
     # capacidad maxima del estacionamiento
     mveh = 100
-    # mveh = 300
+    # mveh = 50
 
     # cantidad de buses que caben en el estacionamiento
     mbus = 2
@@ -84,7 +84,8 @@ try:
     cb_d = [10000, 10000, 6000, 6000, 6000, 6000, 7000, 7000, 8000, 8000]
 
     #Presupuesto disponible para cada liga para los buses
-    pres_d = [100000, 90000, 70000, 60000, 70000, 60000, 80000, 70000, 90000, 80000]
+    # pres_d = [100000, 90000, 70000, 60000, 70000, 60000, 80000, 70000, 90000, 80000]
+    pres_d = [110000, 100000, 76000, 66000, 76000, 66000, 87000, 77000, 98000, 88000]
 
     # si en la cancha c se puede jugar el deporte d = 1, 0 e.o.c.
     s_cd = [[1, 1, 0, 0, 0, 0, 0, 0, 0, 0],  # 1 -> Futbol
@@ -203,7 +204,7 @@ try:
     # Restriccion 7-2 : Presupuesto que hay para contratar buses
 
     m.addConstrs(
-        (quicksum(B_eta[equipo, bloque, dia] * q_ed[deporte-1][equipo-1] * cb_d [deporte-1] for equipo in E for dia in A for bloque in T) <= pres_d[deporte-1]
+        (quicksum(B_eta[equipo, bloque, dia] * q_ed[deporte-1][equipo-1] * cb_d[deporte-1] for equipo in E for dia in A for bloque in T) <= pres_d[deporte-1]
         for deporte in D), "C77")
 
     print("R77 lista")
@@ -211,10 +212,10 @@ try:
     # Restriccion 8: Ctdad. de jugadores que usan los camarines tiene que ser menor a su capacidad maxima para H y M
     m.addConstrs(
         (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia] * n_d[deporte-1] for cancha in C for equipoE in E for equipoO in E
-        if equipoE != equipoO for bloque in T for dia in A) <= 2 * mc for deporte in D if deporte % 2 != 0), "C81")
+        if equipoE != equipoO for deporte in D if deporte % 2 != 0) <= 2 * mc for bloque in T for dia in A), "C81")
     m.addConstrs(
         (quicksum(X_coedta[cancha, equipoO, equipoE, deporte, bloque, dia] * n_d[deporte-1] for cancha in C for equipoE in E for equipoO in E
-        if equipoE != equipoO for bloque in T for dia in A) <= 2 * mc for deporte in D if deporte % 2 == 0), "C82")
+        if equipoE != equipoO for deporte in D if deporte % 2 == 0) <= 2 * mc for bloque in T for dia in A), "C82")
 
     print("R8 lista")
 
